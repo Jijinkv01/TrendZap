@@ -1,0 +1,301 @@
+<link rel="stylesheet" href="/styles/userproduct.css">
+<link rel="stylesheet" href="/styles/home.css">
+<link rel="stylesheet" href="/styles/productDetails.css">
+<link rel="stylesheet" href="/styles/userprofile.css">
+<link rel="stylesheet" href="/styles/userAddress.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<body>
+    {{> navbar}}
+
+    <main class="container-fluid">
+        <div class="row">
+            {{> userProfileSidebar}}
+
+            <!-- Main Address Content -->
+            <div class="col-md-9">
+                <h2>Manage Addresses</h2>
+
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addmodal">
+                    Add New Address
+                </button>
+
+
+                <!-- Available Addresses -->
+                <div id="addresses">
+                    {{#each address}}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{this.firstName}} {{this.lastName}}</h5>
+                            <p><strong>Street Address:</strong> {{this.streetAddress}}</p>
+                            <p><strong>City:</strong> {{this.city}}</p>
+                            <p><strong>State:</strong> {{this.state}}</p>
+                            <p><strong>Postal Code:</strong> {{this.postalCode}}</p>
+
+
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#editAddressModal" onclick="EditAddress('{{this._id}}','{{this.firstName}}',
+                                '{{this.lastName}}',
+                                '{{this.streetAddress}}',
+                                '{{this.city}}',
+                                '{{this.state}}',
+                                '{{this.postalCode}}'
+                                )">
+                                Edit
+                            </button>
+
+                            <button class="btn btn-danger" onclick="deleteAddress('{{this._id}}')">Delete</button>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- add address Modal -->
+    <div class="modal fade" id="addmodal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/addAddress" method="post" id="form">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="firstName" id="addfirstName">
+                            <div id="errorFirstName" style="color: red;"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="lastName" id="addlastName">
+                            <div id="errorLastName" style="color: red;"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="streetAddress" class="form-label">Street Address</label>
+                            <input type="text" class="form-control" name="streetAddress" id="addstreetAddress">
+                            <div id="errorStreetAddress" style="color: red;"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" name="city" id="addcity">
+                            <div id="errorCity" style="color: red;"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <input type="text" class="form-control" name="state" id="addstate">
+                            <div id="errorState" style="color: red;"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="postalCode" class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" name="postalCode" id="addpostalCode">
+                            <div id="errorPostalCode" style="color: red;"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Address</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" clasaddressess="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- edit address Modal -->
+    <div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Address</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAddressForm">
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="streetAddress" class="form-label">Street Address</label>
+                            <input type="text" class="form-control" id="streetAddress" name="streetAddress" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="city" name="city" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <input type="text" class="form-control" id="state" name="state" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="postalCode" class="form-label">Postal Code</label>
+                            <input type="text" class="form-control" id="postalCode" name="postalCode" >
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Address</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+    {{> footer}}
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+
+        function EditAddress(id, firstName, lastName, streetAddress, city, state, postalCode) {
+            document.getElementById("firstName").value = firstName
+            document.getElementById("lastName").value = lastName
+            document.getElementById("streetAddress").value = streetAddress
+            document.getElementById("city").value = city
+            document.getElementById("state").value = state
+            document.getElementById("postalCode").value = postalCode
+            document.getElementById('addAddressForm').dataset.addressId = id
+        }
+
+
+        document.getElementById("addAddressForm").addEventListener("submit", async function (e) {
+            e.preventDefault()
+            const addressId = document.getElementById('addAddressForm').dataset.addressId;
+            const updatedData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                streetAddress: document.getElementById('streetAddress').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                postalCode: document.getElementById('postalCode').value
+            }
+            //  console.log("addressId:",addressId)
+            //  console.log("updatedData:",updatedData)
+            try {
+                const response = await axios.put(`/editAddress/${addressId}`, updatedData)
+
+                if (response.status === 200) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Address updated successfully!',
+                        confirmButtonText: 'OK',
+                    }).then(() => {
+                        location.reload(); // Reload the page to reflect changes
+                    });
+                }
+            } catch (error) {
+                console.error("error updating address", error.response?.data || error.message)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to update address. Please try again!',
+                    confirmButtonText: 'OK',
+                });
+            }
+        })
+
+
+
+        async function deleteAddress(addressId) {
+            try {
+                await axios.delete(`/deleteAddress/${addressId}`);
+
+                alert('Address deleted successfully!');
+                window.location.reload();
+            } catch (error) {
+                console.error('Error deleting address:', error);
+                alert('Failed to delete address. Please try again.');
+            }
+        }
+
+        //add address form validation
+        let form = document.getElementById("form")
+
+        form.addEventListener("submit", (e) => {
+
+            addfirstName = document.getElementById("addfirstName").value.trim()
+            addlastName = document.getElementById("addlastName").value.trim()
+            addstreetAddress = document.getElementById("addstreetAddress").value.trim()
+            addcity = document.getElementById("addcity").value.trim()
+            addstate = document.getElementById("addstate").value.trim()
+            addpostalCode = document.getElementById("addpostalCode").value.trim()
+
+            errorFirstName = document.getElementById("errorFirstName")
+            errorLastName = document.getElementById("errorLastName")
+            errorStreetAddress = document.getElementById("errorStreetAddress")
+            errorCity = document.getElementById("errorCity")
+            errorState = document.getElementById("errorState")
+            errorPostalCode = document.getElementById("errorPostalCode")
+
+            errorFirstName.textContent = ""
+            errorLastName.textContent = ""
+            errorStreetAddress.textContent = ""
+            errorCity.textContent = ""
+            errorState.textContent = ""
+            errorPostalCode.textContent = ""
+
+            if (addfirstName == "") {
+                e.preventDefault()
+                errorFirstName.innerHTML = "firstName is required"
+
+                return false
+            }
+            if (addlastName == "") {
+                e.preventDefault()
+                errorLastName.innerHTML = "lastName is required"
+                return false
+            }
+            if (addstreetAddress == "") {
+                e.preventDefault()
+                errorStreetAddress.innerHTML = "streetAddress is required"
+                return false
+            }
+            if (addcity == "") {
+                e.preventDefault()
+                errorCity.innerHTML = "city is required"
+                return false
+            }
+            if (addstate == "") {
+                e.preventDefault()
+                errorState.innerHTML = "state is required"
+                return false
+            }
+            if (addpostalCode == "") {
+                e.preventDefault()
+                errorPostalCode.innerHTML = "postalCode is required"
+                return false
+            } else if (parseInt(addpostalCode) != addpostalCode) {
+                e.preventDefault();
+                errorPostalCode.innerHTML = "Postal code must be a number";
+                return false;
+            }
+            return true
+
+        })
+
+
+
+
+        
+
+
+
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>

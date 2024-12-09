@@ -1,0 +1,56 @@
+<link rel="stylesheet" href="/styles/wallet.css">
+<link rel="stylesheet" href="/styles/wishlist.css">
+<link rel="stylesheet" href="/styles/cart.css">
+<link rel="stylesheet" href="/styles/userproduct.css">
+<link rel="stylesheet" href="/styles/home.css">
+<link rel="stylesheet" href="/styles/productDetails.css">
+<link rel="stylesheet" href="/styles/userprofile.css">
+<link rel="stylesheet" href="/styles/userAddress.css">
+
+
+ {{> navbar}}
+
+  <main class="container">
+    <div class="row">
+    {{> userProfileSidebar}}
+      
+      <div class="col-md-9 wallet-container">
+        <h1>My Wallet</h1>
+        <div class="wallet-balance">
+           
+          <h2>Balance: ₹<span id="wallet-balance">{{wallet.balance}}</span></h2>
+        </div>
+        <div class="transaction-history">
+          <h3>Transaction History</h3>
+          
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+              
+              </tr>
+            </thead>
+            <tbody id="transaction-history">
+                 {{#each wallet.transactions}}
+              <tr>
+                <td>{{formatDate this.date 'YYYY-MM-DD'}}</td>
+                <td>{{this.type}}</td>
+                <td>{{this.amount}}</td>
+
+              </tr>
+                {{/each}}
+                <tr>
+                    {{!-- <td>{{this.transactions.date}}</td> --}}
+                </tr>
+            </tbody>
+          </table>
+        
+        </div>
+      </div>
+    </div>
+  </main>
+
+  {{> footer}} 
+ 

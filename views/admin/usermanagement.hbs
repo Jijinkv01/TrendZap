@@ -1,0 +1,79 @@
+    <link rel="stylesheet" href="/styles/usermanagement.css">
+    <link rel="stylesheet" href="/styles/admindashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <body>
+    {{> sidebar }}
+    {{> header }}
+
+    <div class="user-management">
+        <h2>User Management</h2>
+
+        <table>
+        <thead>
+            <tr>
+            <th>Sl.No</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each users}}
+            <tr>
+            <td>{{indexPlusOne @index}}</td>
+            <td>{{this.username}}</td>
+            <td>{{this.email}}</td>
+            <td>{{#if this.isBlocked}}Inactive{{else}}Active{{/if}}</td>
+            <td>
+                {{#if this.isBlocked}}
+                <button class="unblock-btn" onclick="updateStatus('{{this._id}}', false)">Unblock</button>
+                {{else}}
+                <button class="block-btn" onclick="updateStatus('{{this._id}}', true)">Block</button>
+                {{/if}}
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+        </table>
+    </div>
+
+
+    <script>
+
+      
+    // Function to block/unblock the user
+    function updateStatus(userId, blockStatus) {
+        axios.post('/admin/blockuser', {
+            userId: userId,
+            blockStatus: blockStatus
+        })
+        .then(response => {
+           Swal.fire({
+                    title: 'Success!',
+                    text: response.data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result)=>{
+                    if(result.isConfirmed){
+                          window.location.reload();
+                    }
+                })
+        })
+        .catch(error => {
+            console.error(error);
+           Swal.fire({
+                    title: 'Error!',
+                    text: "error updating user status",
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+        });
+    }
+
+
+
+    </script>
+
+    </body>

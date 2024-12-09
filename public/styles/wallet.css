@@ -1,0 +1,54 @@
+.wallet-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .wallet-balance {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .wallet-balance h2 {
+    font-size: 2rem;
+    color: #4caf50;
+  }
+  
+  .transaction-history table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .transaction-history th,
+  .transaction-history td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .transaction-history th {
+    background: #f0f0f0;
+  }
+  
+
+
+  body, html {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  
+  main {
+    flex: 1;
+  }
+
+
+  footer {
+    background-color: #f8f9fa; 
+    padding: 20px 0;
+    text-align: center;
+  }

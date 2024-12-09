@@ -1,0 +1,192 @@
+<link rel="stylesheet" href="/styles/wishlist.css">
+<link rel="stylesheet" href="/styles/cart.css">
+<link rel="stylesheet" href="/styles/userproduct.css">
+<link rel="stylesheet" href="/styles/home.css">
+<link rel="stylesheet" href="/styles/productDetails.css">
+<link rel="stylesheet" href="/styles/userprofile.css">
+<link rel="stylesheet" href="/styles/userAddress.css">
+
+
+
+<body>
+    {{>navbar}} 
+   <div class="wishlist-container">
+        <h1>Your Wishlist</h1>
+        <div class="wishlist-items d-flex flex-wrap">
+            {{#each products}}
+            <div class="wishlist-item card mx-2 my-3" id="wishlistProduct-{{this._id}}" style="width: 18rem;">
+                <img src="{{this.image.[0]}}" alt="{{this.productId.name}}" class="card-img-top">
+                <div class="card-body">
+                    <h5 class="card-title">{{this.name}}</h5>
+                    <p class="card-text price">₹{{this.salesPrice}}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button class="btn btn-primary btn-sm add-to-cart" data-id="{{this._id}}"
+                            data-name="{{this.name}}" data-price="{{this.salesPrice}}">
+                            <i class="bi bi-cart"></i> Add to Cart
+                        </button>
+                        <button class="btn btn-danger btn-sm remove-btn" data-product-id="{{this._id}}" 
+                            onclick="removeBtn('{{this._id}}')">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+    <script>
+        //add to cart
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+
+                button.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-id');
+                    //   console.log("Button clicked with productId:", productId);
+
+                    checkStock(productId)
+                        .then(response => {
+                            if (response.inStock) {
+                                const product = {
+                                    id: productId,
+                                    name: this.getAttribute('data-name'),
+                                    price: parseFloat(this.getAttribute('data-price')),
+                                    productImage: this.getAttribute('data-image')
+                                };
+
+                                if (response.userQuantity < response.availableStock) {
+                                    addToCart(product)
+                                        .then(() => {
+                                            if (response.userQuantity + 1 > 5) {
+                                                showLimitedStockAlert('You already have 5 in your cart.');
+                                            }
+                                        });
+                                } else {
+                                    showOutOfStockAlert();
+                                }
+                            } else {
+                                showOutOfStockAlert();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking stock:', error);
+                        });
+                });
+            });
+        });
+
+        // Check product stock function
+        function checkStock(productId) {
+            return axios.post(`/cart/check-stock/${productId}`)
+                .then(response => response.data)
+                .catch(error => {
+                    console.error('Error checking stock:', error);
+                    return { inStock: false, userQuantity: 0, availableStock: 0 };
+                });
+        }
+
+        // Add to cart function
+        function addToCart(product) {
+
+            const cartItem = {
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                imageUrl: product.productImage
+
+            };
+
+            return axios.post(`/cart/add/${window.userId}`, cartItem)
+                .then(response => {
+                    showSuccessAlert('Product added to cart successfully!');
+                    document.getElementById(`wishlistProduct-${product.id}`).remove();
+                    if (window.fetchCartItemCount) {
+                        window.fetchCartItemCount();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    showLimitedStockAlert('You already have a limited quantity of this product in your cart.');
+                });
+        }
+
+        // Show out of stock alert
+        function showOutOfStockAlert() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Out of Stock',
+                text: 'This product is currently unavailable.',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Function to show the limited stock alert
+        function showLimitedStockAlert(message) {
+            console.log(message)
+            Swal.fire({
+                icon: 'info',
+                title: 'Limited Stock',
+                text: message,
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Function to show the success alert
+        function showSuccessAlert(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                confirmButtonText: 'OK'
+            });
+        }
+
+
+
+
+
+        // remove product
+    function removeBtn(productId){
+        axios.delete(`/deleteWishlist/${productId}`)
+      .then(response => {
+            if (response.data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Removed!',
+                    text: 'The product has been removed from your wishlist.',
+                    timer: 2000, // 2 seconds
+                    showConfirmButton: false,
+                    willClose: () => {
+                        // Refresh the page after the alert closes
+                        window.location.reload();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Failed to remove the product from your wishlist.',
+                });
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Something went wrong. Please try again later.',
+            });
+        });
+    }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</body>

@@ -1,0 +1,423 @@
+<link rel="stylesheet" href="/styles/userproduct.css">
+<link rel="stylesheet" href="/styles/home.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+
+<body>
+    {{>navbar}}
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Sidebar for Filters -->
+            <aside class="col-md-3 filter-sidebar">
+                <div class="filter-section">
+                    <h5>Categories</h5>
+                    <ul class="filter-list">
+                        {{#each categories}}
+                        <li><input type="checkbox" id="{{_id}}" name="category" value="{{_id}}"> <label
+                                for="{{_id}}">{{name}}</label></li>
+                        {{/each}}
+                    </ul>
+                </div>
+
+                {{!-- <div class="filter-section">
+                    <h5>Brands</h5>
+                    <ul class="filter-list">
+                        <li><input type="checkbox" id="brand1"> <label for="brand1">Samsung</label></li>
+                        <li><input type="checkbox" id="brand2"> <label for="brand2">Apple</label></li>
+                        <li><input type="checkbox" id="brand3"> <label for="brand3">OnePlus</label></li>
+                    </ul>
+                </div> --}}
+
+
+                <div class="filter-section">
+                    <h5>Price</h5>
+                    <div class="price-range-container">
+                        <input type="range" id="minRange" min="1000" max="100000" step="1000" value="1000"
+                            class="price-range">
+                        <input type="range" id="maxRange" min="1000" max="100000" step="1000" value="100000"
+                            class="price-range">
+                    </div>
+                    <div class="price-label">
+                        ₹<span id="display-min-price">1000</span> - ₹<span id="display-max-price">100000</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-2" onclick="applyCategoryFilter()">Apply</button>
+                </div>
+                <div class="filter-section"><br>
+                    <h5>Sort By</h5>
+                    <select id="sortOptions" class="form-select" onchange="applySort()">
+                        <option value="">Select</option>
+                        <option value="nameAsc">Name (A - Z)</option>
+                        <option value="nameDesc">Name (Z - A)</option>
+                        <option value="priceAsc">Price (Low to High)</option>
+                        <option value="priceDesc">Price (High to Low)</option>
+                    </select>
+                </div>
+            </aside>
+
+            <!-- Main Product Display -->
+            <main class="col-md-9">
+                <h1 class="text-center">All Products</h1>
+                <div class="row listing-row">
+                    {{#each products}}
+                    <div class="col-md-4 mb-4">
+                        <div class="product-card card" style="height: 428px;">
+
+                            <a href="/productDetails/{{this._id}}">
+                                <img src="/{{this.image.[0]}}" class="card-img-top" alt="{{this.name}}">
+                            </a>
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{this.name}}</h5>
+                                <h3 class="card-text">₹{{this.salesPrice}}</h3>
+
+                                <button class="btn btn-outline-danger btn-sm add-to-wishlist" data-id="{{this._id}}"
+                                    title="Add to Wishlist">
+                                    <i class="fa fa-heart"></i>
+                                </button>
+
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="{{this._id}}"
+                                    data-name="{{this.name}}" data-price="{{this.salesPrice}}">
+                                    <i class="bi bi-cart"></i> Add to Cart
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {{#if (gt currentPage 1)}}
+        <li class="page-item">
+            <a class="page-link" href="?page={{subtract currentPage 1}}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {{/if}}
+
+        {{#each (range 1 totalPages)}}
+        <li class="page-item {{#if (eq ../currentPage this)}}active{{/if}}">
+            <a class="page-link" href="?page={{this}}">{{this}}</a>
+        </li>
+        {{/each}}
+
+        {{#if (lt currentPage totalPages)}}
+        <li class="page-item">
+            <a class="page-link" href="?page={{add currentPage 1}}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {{/if}}
+    </ul>
+</nav>
+
+    {{>footer}}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const minRange = document.getElementById('minRange');
+            const maxRange = document.getElementById('maxRange');
+            const displayMinPrice = document.getElementById('display-min-price');
+            const displayMaxPrice = document.getElementById('display-max-price');
+
+            // Update displayed values
+            minRange.addEventListener('input', function () {
+                if (parseInt(minRange.value) >= parseInt(maxRange.value)) {
+                    minRange.value = maxRange.value - 1000; // Ensure minimum range difference
+                }
+                displayMinPrice.innerText = minRange.value;
+            });
+
+            maxRange.addEventListener('input', function () {
+                if (parseInt(maxRange.value) <= parseInt(minRange.value)) {
+                    maxRange.value = parseInt(minRange.value) + 1000; // Ensure minimum range difference
+                }
+                displayMaxPrice.innerText = maxRange.value;
+            });
+        });
+
+
+
+
+
+
+
+
+        //add to cart
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+
+                button.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-id');
+                    //   console.log("Button clicked with productId:", productId);
+
+                    checkStock(productId)
+                        .then(response => {
+                            if (response.inStock) {
+                                const product = {
+                                    id: productId,
+                                    name: this.getAttribute('data-name'),
+                                    price: parseFloat(this.getAttribute('data-price')),
+                                    productImage: this.getAttribute('data-image')
+                                };
+
+                                if (response.userQuantity < response.availableStock) {
+                                    addToCart(product)
+                                        .then(() => {
+                                            if (response.userQuantity + 1 > 5) {
+                                                showLimitedStockAlert('You already have 5 in your cart.');
+                                            }
+                                        });
+                                } else {
+                                    showOutOfStockAlert();
+                                }
+                            } else {
+                                showOutOfStockAlert();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking stock:', error);
+                        });
+                });
+            });
+        });
+
+        // Check product stock function
+        function checkStock(productId) {
+            return axios.post(`/cart/check-stock/${productId}`)
+                .then(response => response.data)
+                .catch(error => {
+                    console.error('Error checking stock:', error);
+                    return { inStock: false, userQuantity: 0, availableStock: 0 };
+                });
+        }
+
+        // Add to cart function
+        function addToCart(product) {
+
+            const cartItem = {
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+                imageUrl: product.productImage
+
+            };
+
+            return axios.post(`/cart/add/${window.userId}`, cartItem)
+                .then(response => {
+                    showSuccessAlert('Product added to cart successfully!');
+                    if (window.fetchCartItemCount) {
+                        window.fetchCartItemCount();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    showLimitedStockAlert('You already have a limited quantity of this product in your cart.');
+                });
+        }
+
+        // Show out of stock alert
+        function showOutOfStockAlert() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Out of Stock',
+                text: 'This product is currently unavailable.',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Function to show the limited stock alert
+        function showLimitedStockAlert(message) {
+            console.log(message)
+            Swal.fire({
+                icon: 'info',
+                title: 'Limited Stock',
+                text: message,
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Function to show the success alert
+        function showSuccessAlert(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                confirmButtonText: 'OK'
+            });
+        }
+
+
+        // filter by category
+        function applyCategoryFilter() {
+            const selectedCategories = [];
+            // Get all selected categories
+            document.querySelectorAll('input[name="category"]:checked').forEach(checkbox => {
+                selectedCategories.push(checkbox.value);
+            });
+
+
+
+            const minPrice = document.getElementById('minRange').value;
+            const maxPrice = document.getElementById('maxRange').value;
+            const sortOptions = document.getElementById("sortOptions").value
+
+            // Send selected categories and price range to the backend
+            axios.get('/filterProducts', {
+                params: {
+                    categories: selectedCategories,
+                    minPrice: minPrice,
+                    maxPrice: maxPrice,
+                    sort: sortOptions
+                }
+            })
+                .then(response => {
+                    // Handle successful response (update product display)
+                    const productsContainer = document.querySelector('.listing-row');
+                    productsContainer.innerHTML = '';  // Clear existing products
+                    response.data.products.forEach(product => {
+
+                        const productCard = `
+                    <div class="col-md-4 mb-4">
+                        <div class="product-card card">
+                            <a href="/productDetails/${product._id}">
+                                <img src="/${product.image[0]}" class="card-img-top" alt="${product.name}">
+                            </a>
+                            <div class="card-body text-center">
+                                <h5 class="card-title">${product.name}</h5>
+                                <h3 class="card-text">₹${product.salesPrice}</h3>
+                                <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${product._id}" data-name="${product.name}" data-price="${product.salesPrice}">
+                                    <i class="bi bi-cart"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+                        productsContainer.innerHTML += productCard;
+                    });
+                    document.querySelectorAll('.add-to-cart').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const productId = this.getAttribute('data-id');
+
+                            checkStock(productId)
+                                .then(response => {
+                                    if (response.inStock) {
+                                        const product = {
+                                            id: productId,
+                                            name: this.getAttribute('data-name'),
+                                            price: parseFloat(this.getAttribute('data-price')),
+                                            productImage: this.getAttribute('data-image')
+                                        };
+
+                                        if (response.userQuantity < response.availableStock) {
+                                            addToCart(product)
+                                                .then(() => {
+                                                    if (response.userQuantity + 1 > 5) {
+                                                        showLimitedStockAlert('You already have 5 in your cart.');
+                                                    }
+                                                });
+                                        } else {
+                                            showOutOfStockAlert();
+                                        }
+                                    } else {
+                                        showOutOfStockAlert();
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error checking stock:', error);
+                                });
+                        });
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Error fetching filtered products:', error);
+                });
+        }
+        function applySort() {
+            applyCategoryFilter()
+        }
+
+
+
+
+
+        // add to wishlist
+       document.addEventListener("DOMContentLoaded", () => {
+    const wishlistButtons = document.querySelectorAll(".add-to-wishlist");
+
+    wishlistButtons.forEach(button => {
+        button.addEventListener("click", async (event) => {
+            const productId = button.getAttribute("data-id");
+
+            try {
+                const response = await axios.post("/wishlist/add", { productId });
+                if (response.data.success) {
+                    // Change button background to red
+                    button.classList.remove("btn-outline-danger");
+                    button.classList.add("btn-danger");
+                    
+                } else {
+                    alert("Failed to add product to wishlist.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred.");
+            }
+        });
+    });
+});
+
+
+
+document.getElementById('searchForm').addEventListener('submit', function (e) {
+    e.preventDefault(); // Prevent the page from reloading
+
+    const query = document.getElementById('searchInput').value.trim();
+
+    if (query) {
+        axios.get('/searchProducts', { params: { query } })
+            .then(response => {
+                const products = response.data.products; // Assuming the backend returns matching products
+                const productsContainer = document.querySelector('.listing-row');
+                productsContainer.innerHTML = ''; // Clear existing products
+
+                // Render the filtered products
+                products.forEach(product => {
+                    const productCard = `
+                        <div class="col-md-4 mb-4">
+                            <div class="product-card card">
+                                <a href="/productDetails/${product._id}">
+                                    <img src="/${product.image[0]}" class="card-img-top" alt="${product.name}">
+                                </a>
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">${product.name}</h5>
+                                    <h3 class="card-text">₹${product.salesPrice}</h3>
+                                    <button class="btn btn-outline-primary btn-sm add-to-cart" data-id="${product._id}" data-name="${product.name}" data-price="${product.salesPrice}">
+                                        <i class="bi bi-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                    productsContainer.innerHTML += productCard;
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching search results:', error);
+            });
+    }
+});
+
+
+
+    </script>
+
+</body>

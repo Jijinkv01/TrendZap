@@ -1,0 +1,50 @@
+
+<link rel="stylesheet" href="/styles/adminSidebar.css">
+
+
+
+ <div class="sidebar">
+    <h2>Admin Panel</h2>
+    <ul>
+      <li><a href="/admin/dashboard"><i class="fas fa-home"></i>Dashboard</a></li>
+      <li><a href="usermanagement"><i class="fas fa-users"></i> Users</a></li>
+      <li><a href="/admin/category"><i class="fas fa-chart-line"></i> Category</a></li>
+      <li><a href="/admin/product"><i class="fas fa-cogs"></i> Products</a></li>
+      <li><a href="/admin/orderManagement"><i class="fas fa-sign-out-alt"></i> Order Management</a></li>
+      <li><a href="/admin/coupon"><i class="fas fa-sign-out-alt"></i> Coupon</a></li>
+        <li><a href="/admin/sales-report"><i class="fas fa-sign-out-alt"></i>Sales Report</a></li>
+          <li><a href="/admin/offerManagement"><i class="fas fa-sign-out-alt"></i> Offers</a></li>
+       <li><a href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+
+<script>
+  // Function to set active class based on saved state
+  function setActiveLink() {
+    const activeLink = localStorage.getItem('activeLink');
+    if (activeLink) {
+      document.querySelectorAll('.sidebar a').forEach(link => {
+        if (link.getAttribute('href') === activeLink) {
+          link.classList.add('active');
+        }
+      });
+    }
+  }
+
+  // Apply active state on page load
+  setActiveLink();
+
+  // Event listener to track link click and save active state
+  document.querySelectorAll('.sidebar a').forEach(link => {
+    link.addEventListener('click', function() {
+      document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active')); // Remove 'active' class from all links
+      this.classList.add('active'); // Add 'active' class to the clicked link
+
+      // Save active link's href to localStorage
+      localStorage.setItem('activeLink', this.getAttribute('href'));
+    });
+  });
+</script>
+
+ 

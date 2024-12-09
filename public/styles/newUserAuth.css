@@ -1,0 +1,26 @@
+.modal-content {
+  border-radius: 15px;
+}
+.modal-header {
+  border-bottom: none;
+}
+.modal-footer {
+  border-top: none;
+}
+.btn-custom {
+  width: 100%;
+  padding: 10px;
+  border-radius: 25px;
+  font-weight: bold;
+}
+.btn-login {
+  background-color: #007bff;
+  color: white;
+}
+.btn-signup {
+  background-color: #28a745;
+  color: white;
+}
+.btn-login:hover, .btn-signup:hover {
+  opacity: 0.9;
+}

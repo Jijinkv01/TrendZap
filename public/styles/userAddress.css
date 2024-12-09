@@ -1,0 +1,139 @@
+body {
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Container and Rows */
+  .container-fluid {
+    padding: 2rem;
+  }
+  
+  /* Main Content */
+  .col-md-9 {
+    padding: 2rem;
+  }
+  
+  /* Heading */
+  h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  /* Button Styling */
+  .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+  }
+  
+  .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+  }
+  
+  .btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+  }
+  
+  .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+  }
+  
+  /* Address Cards */
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+  }
+  
+  .card p {
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Modal Styling */
+  .modal-content {
+    border-radius: 8px;
+  }
+  
+  .modal-header {
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-body .form-label {
+    font-size: 1rem;
+  }
+  
+  .modal-body .form-control {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .modal-footer {
+    border-top: 1px solid #ddd;
+  }
+  
+  /* Sidebar */
+  #userProfileSidebar {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+  }
+  
+  #userProfileSidebar a {
+    text-decoration: none;
+    color: #007bff;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  
+  #userProfileSidebar a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Responsiveness */
+  @media (max-width: 768px) {
+    .col-md-9 {
+      padding: 1rem;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  }

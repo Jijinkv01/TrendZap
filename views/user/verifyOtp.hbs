@@ -1,0 +1,131 @@
+ <link rel="stylesheet" href="/styles/verificationOtp.css">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+
+ <body>
+<div class="container">
+    <div class="login_wrap">
+        <div class="padding_eight_all bg-white">
+            <div class="heading_s1">
+                <h3>OTP Verification Page</h3>
+            </div>
+            <form id="otpForm" action="/verifyOtp" method="post" onsubmit=" return validateOTPForm()">
+                <div class="form-group">
+                    <label for="otp">Enter OTP:</label>
+                    <input type="text" id="otp" name="otp" class="form-control" required maxlength="6" pattern="\d*" />
+                </div>
+                <button type="submit" class="btn btn-primary">Verify Email</button>
+                <div class="form-group text-center">
+                    <div id="otpTimer" class="otp-timer">
+                        <span id="timerValue">60</span>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="resendOTP()">Resend OTP</button>
+                </div>
+                {{#if message}}
+                <div class="alert alert-danger">{{message}}</div>
+                {{/if}}
+            </form>
+            <div class="text-muted text-center pt-25">
+                Already verified? <a href="/login">Login now</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.getElementById("otp").focus();
+
+    let timer = 60;
+    let timerInterval;
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timer--;
+            document.getElementById("timerValue").textContent = timer;
+            if (timer <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById("timerValue").classList.add("expired");
+                document.getElementById("timerValue").textContent = "Expired";
+                document.getElementById("otp").disabled = true;
+            }
+        }, 1000);
+    }
+    startTimer();
+
+    function validateOTPForm(){
+        const otpInput = document.getElementById("otp").value
+
+        $.ajax({
+            type:"POST",
+            url:"/verifyOtp",
+            data:{otp:otpInput},
+            success: function(response){
+                if(response.success){
+                    Swal.fire({
+                        icon:"success",
+                        title:"OTP verified successfilly",
+                        showConfirmButton:false,
+                        timer:1500,
+                    })
+                    .then(()=>{
+                        window.location.href = response.redirectUrl
+                    })
+                } else {
+                    Swal.fire({
+                         icon:"error",
+                        title:"Error",
+                        text:response.message,
+                        
+                    })
+                }
+            },
+            error:function(){
+                Swal.fire({
+                    icon:"error",
+                    title:"invalid OTP",
+                    text:"please try again",
+                })
+            }
+        })
+        return false
+    }
+
+    function resendOTP(){
+        clearInterval(timerInterval)
+        timer=60;
+        document.getElementById("otp").disabled=false   
+        document.getElementById("timerValue").classList.remove("expired")
+        startTimer()
+        $.ajax({
+            type:"POST",
+            url:"/resend-otp",
+            success:function(response){
+                if(response.success){
+                    Swal.fire({
+                        icon:"success",
+                        title:"OTP resend successfully",
+                        showConfirmButton:false,
+                        timer:1500,
+                    })
+                } else{
+                    Swal.fire({
+                        icon:"error",
+                        title:"Error",
+                        text:"an error occered while resending otp. try again"
+                    })
+                }
+
+            }
+        })
+        return false
+    }
+
+
+
+
+
+</script>
+
+</body>

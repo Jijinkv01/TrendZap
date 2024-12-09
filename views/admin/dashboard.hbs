@@ -1,0 +1,176 @@
+<link rel="stylesheet" href="/styles/admindashboard.css">
+
+
+<body>
+  {{>sidebar}}
+
+  {{>header}}
+
+ <h2>Dashboard</h2>
+ 
+
+
+<div class="container mt-4">
+  <!-- Bar Chart Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Best-Selling Products</h5>
+          <div class="dropdown">
+  <button class="btn btn-primary dropdown-toggle" type="button" id="timeFilter" data-bs-toggle="dropdown" aria-expanded="false">
+    <span id="filterLabel">Yearly</span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="timeFilter">
+    <li><button class="dropdown-item" onclick="changeFilter('yearly')">Yearly</button></li>
+    <li><button class="dropdown-item" onclick="changeFilter('monthly')">Monthly</button></li>
+  </ul>
+</div>
+
+        </div>
+        <div class="card-body">
+          <canvas id="bestSellingChart" width="300" height="80" ></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards Section -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm" style="width: auto;">
+        <div class="card-header">
+          <h6 class="mb-0">Top 10 Best-Selling Categories</h6>
+        </div>
+        <div class="card-body">
+          <ul id="categoryList" class="list-group list-group-flush">
+            <!-- Dynamically populate top categories -->
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm" style="width: auto;" >
+        <div class="card-header">
+          <h6 class="mb-0">Top 10 Best-Selling Brands</h6>
+        </div>
+        <div class="card-body">
+          <ul id="brandList" class="list-group list-group-flush">
+            <!-- Dynamically populate top brands -->
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<script>
+
+ function changeFilter(filter) {
+    // Update the button label based on the selected filter
+    const filterLabel = document.getElementById('filterLabel');
+    if (filter === 'yearly') {
+      filterLabel.textContent = 'Yearly';
+    } else if (filter === 'monthly') {
+      filterLabel.textContent = 'Monthly';
+    }
+
+    // Call the fetchAnalytics function with the selected filter
+    fetchAnalytics(filter);
+  }
+
+  function fetchAnalytics(period) {
+    // Your logic to fetch analytics based on the period (yearly or monthly)
+    console.log("Fetching analytics for: " + period);
+    // Add your API request or other logic here
+  }
+
+
+
+
+
+  async function fetchAnalytics(type = 'yearly') {
+  try {
+    const response = await axios.get('/admin/best-sellingData', {
+      params: { type },
+    });
+
+    const { products, categories, brands } = response.data;
+
+    // Update Chart
+    const productNames = products.map((p) => p.name);
+    const productQuantities = products.map((p) => p.totalQuantity);
+    updateChart(productNames, productQuantities);
+
+    // Update Categories
+    const categoryList = document.getElementById('categoryList');
+    categoryList.innerHTML = '';
+    categories.forEach((category) => {
+      const li = document.createElement('li');
+      li.textContent = `${category.name} - ${category.totalQuantity}`;
+      li.className = 'list-group-item';
+      categoryList.appendChild(li);
+    });
+
+    // Update Brands
+    const brandList = document.getElementById('brandList');
+    brandList.innerHTML = '';
+    brands.forEach((brand) => {
+      const li = document.createElement('li');
+      li.textContent = `${brand.brand} - ${brand.totalQuantity}`;
+      li.className = 'list-group-item';
+      brandList.appendChild(li);
+    });
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+  }
+}
+
+// Initialize with Yearly Data
+
+ document.addEventListener('DOMContentLoaded', () => {
+        fetchAnalytics('yearly'); 
+    });
+
+
+let chart;
+
+function updateChart(labels, data) {
+  const ctx = document.getElementById('bestSellingChart').getContext('2d');
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Sales Quantity',
+          data,
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+      },
+    },
+  });
+}
+
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>

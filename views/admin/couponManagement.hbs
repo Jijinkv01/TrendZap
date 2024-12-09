@@ -1,0 +1,181 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/couponManagement.css">
+<link rel="stylesheet" href="/styles/usermanagement.css">
+<link rel="stylesheet" href="/styles/admindashboard.css">
+<link rel="stylesheet" href="/styles/category.css">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+
+{{> sidebar }}
+{{> header }}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sl.No</th>
+            <th>Code</th>
+            <th>Discount (%)</th>
+            <th>Min Purchase</th>
+            <th>Expiry Date</th>
+            <th>Max Uses</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="coupon-list">
+        {{#each coupon}}
+        <tr>
+            <td>{{@ index}}</td>
+            <td>{{this.code}}</td>
+            <td>{{this.discount}}</td>
+            <td>{{this.minPurchase}}</td>
+            <td>{{formatDate this.expiryDate 'YYYY-MM-DD'}}</td>
+            <td>{{this.maxUses}}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="removeCoupon('{{this._id}}')">Remove</button>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+<button class="btn btn-primary" onclick="openCreateCouponModal()">Add Coupon</button>
+
+
+
+
+<div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="couponModalLabel">Add/Edit Coupon</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="couponForm">
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Coupon Code</label>
+                        <input type="text" id="code" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="discount" class="form-label">Discount (%)</label>
+                        <input type="number" id="discount" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="minPurchase" class="form-label">Minimum Purchase (₹)</label>
+                        <input type="number" id="minPurchase" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="expiryDate" class="form-label">Expiry Date</label>
+                        <input type="date" id="expiryDate" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxUses" class="form-label">Max Uses</label>
+                        <input type="number" id="maxUses" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Coupon</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function openCreateCouponModal(coupon = null) {
+        // Reset the form fields
+        document.getElementById('couponForm').reset();
+
+        // If editing, pre-fill the fields with coupon data
+        if (coupon) {
+            document.getElementById('code').value = coupon.code;
+            document.getElementById('discount').value = coupon.discount;
+            document.getElementById('minPurchase').value = coupon.minPurchase || '';
+            document.getElementById('expiryDate').value = coupon.expiryDate.split('T')[0]; // Format date
+            document.getElementById('maxUses').value = coupon.maxUses || '';
+        }
+
+        // Update the modal title
+        const modalTitle = coupon
+            ? 'Edit Coupon'
+            : 'Add Coupon';
+        document.getElementById('couponModalLabel').textContent = modalTitle;
+
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('couponModal'));
+        modal.show();
+    }
+
+    document.getElementById('couponForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const couponData = {
+            code: document.getElementById('code').value.trim(),
+            discount: document.getElementById('discount').value.trim(),
+            minPurchase: document.getElementById('minPurchase').value.trim(),
+            expiryDate: document.getElementById('expiryDate').value.trim(),
+            maxUses: document.getElementById('maxUses').value.trim(),
+        };
+
+
+        try {
+            const response = await axios.post('/admin/addCoupon', couponData);
+            Swal.fire({
+                title: 'Success!',
+                text: response.data.message,
+                icon: 'success',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                location.reload(); // Reload the page after the alert is closed
+            });
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                title: 'Error!',
+                text: error.response?.data?.error || 'Failed to add coupon',
+                icon: 'error',
+                confirmButtonText: 'Try Again',
+            });
+        }
+    });
+
+
+    async function removeCoupon(couponId) {
+        try {
+            const confirmation = await Swal.fire({
+                title: 'Are you sure?',
+                text: 'This coupon will be permanently deleted.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+            });
+
+            // If the user confirms, send a DELETE request to the backend
+            if (confirmation.isConfirmed) {
+                const response = await axios.delete(`/admin/removeCoupon/${couponId}`);
+
+                // Show success message
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: response.data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    location.reload(); // Reload the page to reflect changes
+                });
+            }
+        } catch (error) {
+            // Show error message if the deletion fails
+            Swal.fire({
+                title: 'Error!',
+                text: error.response?.data?.error || 'Failed to delete coupon',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
+    }
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

@@ -1,0 +1,131 @@
+/* General table styling */
+.table {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0px 4px 6px rgba(245, 244, 244, 0.1);
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #f9f2f2;
+    font-weight: bold;
+    text-align: center;
+}
+
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+/* Action buttons */
+.btn-edit {
+    color: #fff;
+    background-color: #0d6efd;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.btn-edit:hover {
+    background-color: #0b5ed7;
+}
+
+.btn-delete {
+    color: #fff;
+    background-color: #dc3545;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
+
+/* Add Coupon Button */
+button.btn-primary {
+    margin-top: 15px;
+    float: right;
+    background-color: #198754;
+    border-color: #198754;
+}
+
+button.btn-primary:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    background-color: #0d6efd;
+    color: #fff;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.modal-title {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.modal-body {
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+
+.modal-body .form-label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #555;
+}
+
+.modal-body .form-control {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.modal-body .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+}
+
+.modal-footer {
+    padding: 15px;
+    border-top: none;
+}
+
+.modal-footer .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .table {
+        font-size: 14px;
+    }
+
+    .modal-body .form-control {
+        font-size: 13px;
+    }
+
+    button.btn-primary {
+        width: 100%;
+    }
+}

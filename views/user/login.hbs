@@ -1,0 +1,83 @@
+<link rel="stylesheet" href="/styles/login.css">
+
+
+
+<body>
+  <div class="container">
+    <!-- Left Side Image Section -->
+    <div class="image-section">
+      <img src="https://images.samsung.com/is/image/samsung/assets/levant/galaxy-5g/5g-products/pc_31_5g_ultra_big_banner.jpg?$1440_N_JPG$" alt="Shop with Us">
+    </div>
+
+    <!-- Login Form Section -->
+    <div class="form-section">
+      <h2>TrendZap</h2>
+      <p>Please log in to your account.</p>
+      <form id="form" action="/login" method="POST">
+        <div class="input-group">
+          <label for="email">Email</label>  <span style="color: red;" id="error_email"></span>
+          <input type="email" id="email" name="email">
+        </div>
+       
+        <div class="input-group">
+          <label for="password">Password</label> <span style="color: red;" id="error_password"></span>
+          <input type="password" id="password" name="password">
+        </div>
+
+        <button type="submit" class="login-btn">Login</button>
+        <p class="signup-link">Don't have an account? <a href="/signup">Sign up</a></p>
+      </form>
+    </div>
+  </div>
+
+ 
+ 
+
+
+    <script>
+        let form= document.getElementById("form")
+        form.addEventListener("submit",(e)=>{
+            let email=document.getElementById("email").value.trim()
+            let password=document.getElementById("password").value.trim()
+            let error_email=document.getElementById("error_email")
+            let error_password=document.getElementById("error_password")
+
+            error_email.textContent=""
+            error_password.textContent=""
+
+            if(email==""){
+                e.preventDefault()
+                error_email.innerHTML="Email is required"
+                return false
+            }
+            if(password==""){
+                e.preventDefault()
+                error_password.innerHTML="Password is required"
+                return false
+            }
+            if(password.length < 5){
+                e.preventDefault()
+                error_password.innerHTML="Password must be more than 5 char"
+                return false
+            }
+
+            return true
+        })
+
+{{#if errorMessage}}
+    Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '{{errorMessage}}',
+        confirmButtonText: 'Try Again'
+    });
+{{/if}}
+
+
+
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+

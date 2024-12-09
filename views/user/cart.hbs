@@ -1,0 +1,151 @@
+<link rel="stylesheet" href="/styles/cart.css">
+<link rel="stylesheet" href="/styles/userproduct.css">
+<link rel="stylesheet" href="/styles/home.css">
+<link rel="stylesheet" href="/styles/productDetails.css">
+<link rel="stylesheet" href="/styles/userprofile.css">
+<link rel="stylesheet" href="/styles/userAddress.css">
+
+
+
+<body>
+  {{>navbar}}
+  <div class="container mt-5">
+    <h2 class="text-center">My Cart</h2>
+    {{#if cart.items.length}}
+    <table class="table table-bordered mt-4">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Image</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each cart.items}}
+        <tr id="product-row-{{this.productId._id}}">
+          <td>{{this.productName}}</td>
+          <td>
+            <img src="{{this.productId.image.[0]}}" alt="{{this.productName}}" class="img-thumbnail"
+              style="width: 100px;">
+          </td>
+          <td>₹{{this.price}}</td>
+
+          <td>
+            <div class="input-group">
+              <button class="btn btn-outline-secondary"
+                onclick="updateQuntity('dec',{{this.price}},'{{this.productId._id}}')">-</button>
+              <input type="text" class="form-control text-center" id="quantity-{{this.productId._id}}"
+                value="{{this.quantity}}" readonly>
+              <button class="btn btn-outline-secondary"
+                onclick="updateQuntity('inc',{{this.price}},'{{this.productId._id}}')">+</button>
+            </div>
+          </td>
+
+          <td id="total-{{this.productId._id}}" class="totalPrice">₹{{multiply this.quantity this.price}}</td>
+          <td>
+            <!-- Hidden span to store only productId -->
+            <input type="hidden" id="productId" value="{{this.productId._id}}">
+            <button class="btn btn-danger" onclick="removeBtn('{{this.productId._id}}')">Remove</button>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+
+
+
+
+    </table>
+    <div class="d-flex justify-content-between align-items-center">
+      <h4>Total: ₹ <span id="cart-total">{{cart.totalPrice}}</span></h4>
+      <a href="/checkout"><button class="btn btn-success">Proceed to Checkout</button></a>
+    </div>
+    {{else}}
+    <p class="text-center mt-5">Your cart is empty.</p>
+    {{/if}}
+  </div>
+
+  <script>
+
+
+
+
+
+    function removeBtn(productId) {
+
+      axios.delete(`/deleteCart/${productId}`)
+        .then(response => {
+          document.getElementById("cart-total").innerHTML = `${response.data.totalPrice}`;
+          document.getElementById(`product-row-${productId}`).remove();
+        })
+        .catch(error => {
+          console.error(error)
+        })
+
+
+
+    }
+
+
+
+
+
+    function updateQuntity(action, price, productId) {
+      let inputQuantity = document.getElementById(`quantity-${productId}`)
+      let totalPriceElement = document.getElementById(`total-${productId}`)
+      let cartTotalElement = document.getElementById("cart-total")
+
+      currentQuantity = parseInt(inputQuantity.value)
+
+      if (action === "inc") {
+        currentQuantity += 1
+      } else if (action === "dec" && currentQuantity > 1) {
+        currentQuantity -= 1
+      }
+      inputQuantity.value = currentQuantity
+      let totalPrice = currentQuantity * price
+     
+      totalPriceElement.innerText = `${totalPrice}`
+
+      updateCartTotal()
+      let cartTotal = calculateCartTotal()
+
+      axios.patch("/updateQuantity",{
+        productId: productId,
+        quantity: currentQuantity,
+        productTotal: totalPrice,
+        cartTotal: cartTotal
+      })
+      .then(response =>{
+         console.log('Cart updated successfully:', response.data);
+      })
+      .catch(error =>{
+        console.error('Error updating cart:', error);
+      })
+    }
+
+
+    function updateCartTotal() {
+      let total = calculateCartTotal()
+       document.getElementById('cart-total').innerText = `₹${total}`;
+   
+    }
+
+    function calculateCartTotal(){
+      let total = 0;
+    document.querySelectorAll('.totalPrice').forEach(item => {
+        let priceText = item.innerText.replace('₹', ''); // Remove currency symbol
+        total += parseInt(priceText);
+    })
+    return total
+    }
+
+
+
+
+
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</body>

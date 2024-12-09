@@ -1,0 +1,279 @@
+<link rel="stylesheet" href="/styles/usermanagement.css">
+<link rel="stylesheet" href="/styles/admindashboard.css">
+<link rel="stylesheet" href="/styles/category.css">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+<body>
+    {{> sidebar }}
+    {{> header }}
+
+    <div class="category-management">
+        <h2>Category Management</h2>
+
+        <button onclick="openAddCategoryModal()">Add New Category</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Sl.No</th>
+                    <th>Category Name</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each categories}}
+                <tr>
+                    <td>{{indexPlusOne @index}}</td>
+                    <td>{{this.name}}</td>
+                    <td>{{#if this.isBlocked}}Inactive{{else}}Active{{/if}}</td>
+                  
+                    <td>
+                        <button class="edit-btn"
+                            onclick="openEditCategoryModal('{{this._id}}','{{this.name}}')">Edit</button>
+                        <button class="delete-btn" onclick="deleteCategory('{{this._id}}')">Delete</button>
+                        {{#if this.isBlocked}}
+                <button class="unblock-btn" onclick="disableAndEnable('{{this._id}}', false)">Enable</button>
+                {{else}}
+                <button class="block-btn" onclick="disableAndEnable('{{this._id}}', true)">Disable</button>
+                {{/if}}
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+    <!-- Open Add Category Modal -->
+    <div id="addCategoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddCategoryModal()">&times;</span>
+            <h2>Add Category</h2>
+
+            <!-- Form for adding a category -->
+            <form id="addCategoryForm" onsubmit="submitCategory(event)">
+                <!-- Category Name Input -->
+                <label for="newCategoryName">Category Name:</label>
+                <input type="text" id="newCategoryName" name="name" placeholder="Enter Category Name">
+
+                <!-- Add Button -->
+                <button type="submit" id="addCategoryButton">Add</button>
+            </form>
+        </div>
+    </div>
+
+
+  
+
+
+    <!-- Open Edit Category Modal -->
+    <div id="editCategoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCategoryModal()">&times;</span>
+            <h2>Edit Category</h2>
+            <form id="editCategoryForm" onsubmit="updateCategory(event)">
+                <input type="text" id="editCategoryName" placeholder="Category Name"    >
+                <input type="hidden" id="editCategoryId">
+
+                <button>Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+
+
+        // Function to open the Add Category modal
+        function openAddCategoryModal() {
+            document.getElementById('addCategoryModal').style.display = 'block';
+        }
+
+      
+
+        // Function to close the Add category modal
+        function closeAddCategoryModal() {
+            document.getElementById('addCategoryModal').style.display = 'none';
+        }
+
+
+        // Function to open the Edit category modal
+        function openEditCategoryModal(categoryId, categoryName) {
+            console.log(categoryId,categoryName)
+            document.getElementById('editCategoryModal').style.display = 'block';
+            document.getElementById('editCategoryName').value = categoryName;
+            document.getElementById('editCategoryId').value = categoryId;
+        }
+
+
+        // Function to close the Edit Category modal
+        function closeEditCategoryModal() {
+            document.getElementById('editCategoryModal').style.display = 'none'
+        }
+
+
+        //  add a new category
+        function submitCategory(event) {
+            event.preventDefault()
+            const name = document.getElementById("newCategoryName").value.trim()
+              
+            axios.post('/admin/addcategory', { name: name })
+
+                .then(function (response) {
+                    if (response.data.success) {
+                       Swal.fire({
+                    title: 'Success!',
+                    text: response.data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result)=>{
+                    if(result.isConfirmed){
+                              closeAddCategoryModal()
+                        document.getElementById('newCategoryName').value = ''
+                        location.reload()
+                    }
+                });
+                      
+                    } else {
+                         Swal.fire({
+                    title: 'Error!',
+                    text: response.data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error:', error)
+                   Swal.fire({
+                title: 'Error!',
+                text: error.response?.data?.message || 'An error occurred',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+                })
+        }
+
+
+        
+
+        // submit the updated category
+        function updateCategory(event) {
+            event.preventDefault()
+
+            const categoryId = document.getElementById('editCategoryId').value;
+            const updatedName = document.getElementById('editCategoryName').value.trim();
+           
+            axios.put(`/admin/updatecategory/${categoryId}`, { name: updatedName })
+ 
+                .then(function (response) {
+                    if (response.data.success) {
+                         Swal.fire({
+                    title: 'Success!',
+                    text: response.data.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then((result)=>{
+                    if(result.isConfirmed){
+                          closeEditCategoryModal();
+                        location.reload(); // Optionally reload to reflect changes
+                    }
+                });
+                      
+                    } else {
+                        Swal.fire({
+                    title: 'Error!',
+                    text: response.data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                    }
+                })
+                .catch(function (error) {
+                    console.error("error:", error);
+                  Swal.fire({
+                title: 'Error!',
+                text: error.response?.data?.message || 'An error occurred',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+                });
+        }
+
+
+
+        //  delete a category
+        async function deleteCategory(id) {
+            if (confirm('Are you sure you want to delete this category?')) {
+                try {
+                    await axios.patch(`/admin/deletecategory/${id}`, { isdeleted: true });
+                     Swal.fire({
+                title: 'Success!',
+                text: 'Category deleted successfully.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then((result)=>{
+                if(result.isConfirmed){
+                    // Refresh the category list after deletion
+                    location.reload();
+                }
+            })
+                    
+                } catch (error) {
+                    console.error("Error deleting category:", error);
+                    Swal.fire({
+                title: 'Error!',
+                text: error.response?.data?.message || 'An error occurred',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+                }
+            }
+        }
+
+
+
+        // disable and enable status
+        function disableAndEnable(categoryId,blockStatus){
+          axios.post('/admin/disableCategory', {
+            categoryId: categoryId,
+            blockStatus: blockStatus
+        })
+
+            .then(response => {
+           Swal.fire({
+            title: 'Success!',
+            text: response.data.message,
+            icon: 'success',
+            confirmButtonText: 'OK'
+        }).then((result)=>{
+            if(result.isConfirmed){
+                // Optionally reload the page or update the UI dynamically
+            window.location.reload();
+            }
+        })
+            
+        })
+          .catch(function (error) {
+           console.error(error);
+            Swal.fire({
+            title: 'Error!',
+            text: 'Error updating category status',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        });
+        }
+
+
+
+    </script>
+
+
+
+</body>

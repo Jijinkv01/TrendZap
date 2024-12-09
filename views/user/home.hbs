@@ -1,0 +1,153 @@
+<link rel="stylesheet" href="/styles/home.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
+<body>
+    {{>navbar}}
+
+    <main class="container mt-4">
+        <div class="banner mb-4">
+            <img src="/uploads/realmi banner.jpg" class="img-fluid w-100" alt="Banner Image">
+        </div>
+        <h1 class="text-center">Featured Products</h1>
+        <div class="row">
+            {{#each products}}
+            <div class="col-md-3 mb-4">
+                 <div class="product-card card" style="height: 428px;">
+                    <a href="/productDetails/{{this._id}}"> <img src="/{{this.image.[0]}}" class="card-img-top"
+                            alt="Mobile Phone 1"></a>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{this.name}}</h5>
+                        <p class="card-text">₹{{this.salesPrice}}</p>
+                        <button class="btn btn-outline-primary btn-sm add-to-cart" data-image="/{{this.image.[0]}}"
+                            data-id="{{this._id}}" data-name="{{this.name}}" data-price="{{this.salesPrice }}">
+                            <i class="bi bi-cart"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        <div class="banner mb-4">
+            <img src="/uploads/samsung banner.jpg" class="img-fluid w-100" alt="Banner Image">
+        </div>
+
+    </main>
+
+
+
+    {{>footer}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  //add to cart
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+      console.log("hai")
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-id');
+            console.log("Button clicked with productId:", productId);
+
+            checkStock(productId)
+                .then(response => {
+                    if (response.inStock) {
+                        const product = {
+                            id: productId,
+                            name: this.getAttribute('data-name'),
+                            price: parseFloat(this.getAttribute('data-price')),
+                            productImage: this.getAttribute('data-image') 
+                        };
+
+                        if (response.userQuantity < response.availableStock) {
+                            addToCart(product)
+                                .then(() => {
+                                    if (response.userQuantity + 1 > 5) {
+                                        showLimitedStockAlert('You already have 5 in your cart.');
+                                    }
+                                });
+                        } else {
+                            showOutOfStockAlert();
+                        }
+                    } else {
+                        showOutOfStockAlert();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking stock:', error);
+                });
+        });
+    });
+});
+
+// Check product stock function
+function checkStock(productId) {
+    return axios.post(`/cart/check-stock/${productId}`)
+        .then(response => response.data)
+        .catch(error => {
+            console.error('Error checking stock:', error);
+            return { inStock: false, userQuantity: 0, availableStock: 0 };
+        });
+}
+
+// Add to cart function
+function addToCart(product) {
+  console.log("hai hooi")
+    const cartItem = {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        imageUrl: product.productImage
+
+    };
+  console.log(cartItem)
+    return axios.post(`/cart/add/${window.userId}`, cartItem)
+        .then(response => {
+            showSuccessAlert('Product added to cart successfully!');
+            if (window.fetchCartItemCount) {
+                window.fetchCartItemCount();
+            }
+        })
+        .catch(error => {
+            console.error('Error adding to cart:', error);
+            showLimitedStockAlert('You already have a limited quantity of this product in your cart.');
+        });
+}
+
+// Show out of stock alert
+function showOutOfStockAlert() {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Out of Stock',
+        text: 'This product is currently unavailable.',
+        confirmButtonText: 'OK'
+    });
+}
+
+// Function to show the limited stock alert
+function showLimitedStockAlert(message) {
+    Swal.fire({
+        icon: 'info',
+        title: 'Limited Stock',
+        text: message,
+        confirmButtonText: 'OK'
+    });
+}
+
+// Function to show the success alert
+function showSuccessAlert(message) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: message,
+        confirmButtonText: 'OK'
+    });
+}
+
+</script>
+
+</body>

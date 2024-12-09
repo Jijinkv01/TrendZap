@@ -1,0 +1,543 @@
+<link rel="stylesheet" href="/styles/admindashboard.css">
+<link rel="stylesheet" href="/styles/category.css">
+<link rel="stylesheet" href="/styles/usermanagement.css">
+<link rel="stylesheet" href="/styles/product.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+
+
+<body>
+  {{>sidebar}}
+  {{>header}}
+
+  <div class="dashboard-container">
+    <!-- Dashboard Cards Section -->
+    <div class="dashboard-cards">
+      <div class="card card-products">
+        <h3>Total Products</h3>
+        <p>250</p>
+      </div>
+      <div class="card card-lowstock">
+        <h3>Low Stock</h3>
+        <p>12</p>
+      </div>
+      <div class="card card-categories">
+        <h3>Categories</h3>
+        <p>15</p>
+      </div>
+      <div class="card card-deleted">
+        <h3>Deleted Products</h3>
+        <p>20</p>
+      </div>
+    </div>
+
+    <!-- Product Management Section -->
+    <div class="product-management">
+      <div class="header-row">
+        <h2>Manage Products</h2>
+        <button class="add-btn">Add New Product</button>
+      </div>
+
+      <!-- Product List Section -->
+      <div class="product-list">
+        <table>
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Product Image</th>
+              <th>Name</th>
+              <th>Brand</th>
+              <th>Category</th>
+              <th>Regular Price</th>
+              <th>Sales Price</th>
+              <th>Quantity</th>
+              <th>Color</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each products}}
+            <tr data-id="{{this._id}}">
+              <td>{{indexPlusOne @index}}</td>
+              <td style="display: flex; justify-content: center; align-items: center;">
+                <img src="/{{this.image.[0]}}" alt="Product Image" style="width: 50px; height: 50px;">
+              </td>
+              <td>{{this.name}}</td>
+              <td>{{this.brand}}</td>
+              <td>{{this.category.name}}</td>
+              <td>{{this.regularPrice}}</td>
+              <td>{{this.salesPrice}}</td>
+              <td>{{this.quantity}}</td>
+              <td>{{this.color}}</td>
+              <td>
+                <button class="edit-btn" onclick="openEditModal(
+                '{{this._id}}',
+                '{{this.name}}',
+                '{{this.brand}}',
+                '{{this.category.id}}',
+                '{{this.description}}',
+                '{{this.regularPrice}}',
+                '{{this.salesPrice}}',
+                '{{this.quantity}}',
+                '{{this.color}}',
+      
+                '{{this.image}}')">Edit</button>
+      
+                <button class="delete-btn" onclick="moveToDeleted(
+                '{{this._id}}')">Delete</button>
+              </td>
+            </tr>
+
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+        <div>
+
+        <div class="d-flex justify-content-center mt-4">
+    <ul class="pagination justify-content-center">
+        {{#each pagination}}
+        <li class="page-item {{#if active}}active{{/if}}">
+            <a class="page-link" href="?page={{this.page}}&limit=5">{{this.page}}</a>
+        </li>
+        {{/each}}
+    </ul>
+</div>
+       
+
+  
+
+      <!-- Deleted Products Section -->
+      <div class="deleted-products">
+        <h3>Recently Deleted</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Brand</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deletedProductsTableBody">
+            {{#each BlockedProducts}}
+
+            <td>{{this.name}}</td>
+            <td>{{this.brand}}</td>
+            <td>{{this.description}}</td>
+            <td>
+              <button class="delete-btn" onclick="restoreProduct(
+                '{{this._id}}')">Restore</button>
+            </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+
+      {{!-- add product modal --}}
+      <div id="addProductModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeAddProductModal()">&times;</span>
+          <h2>Add New Product</h2>
+          <form id="addProductForm" enctype="multipart/form-data" onsubmit="submitNewProduct(event)">
+            <label for="productName">Product Name</label>
+            <input type="text" id="productName" name="name" required>
+
+            <label for="productBrand">Brand</label>
+            <input type="text" id="productBrand" name="brand" required>
+
+            <label for="productCategory">Category</label>
+            <select id="productCategory" name="category" required>
+              <option value="">Select Category</option>
+              {{#each categories}}
+              <option value="{{this._id}}">{{this.name}}</option>
+              {{/each}}
+            </select>
+
+            <label for="productDescription">Description</label>
+            <textarea id="productDescription" name="description" required></textarea>
+
+            <label for="regularPrice">Regular Price</label>
+            <input type="number" id="regularPrice" name="regularPrice" required>
+
+            <label for="salesPrice">Sales Price</label>
+            <input type="number" id="salesPrice" name="salesPrice" required>
+
+            <label for="productStock">Quantity</label>
+            <input type="number" id="productStock" name="quantity" required>
+
+            <label for="productColor">Color</label>
+            <input type="text" id="productColor" name="color" required>
+
+            <label for="productImages">Upload Images (Max 3)</label>
+            <input type="file" id="productImages" name="productImages" multiple accept="image/*"
+              onchange="previewAndCropImages(event)" required>
+            <div id="imagePreviewContainer"></div>
+
+            <button type="submit">Save Product</button>
+          </form>
+        </div>
+      </div>
+
+
+
+      {{!-- edit product modal --}}
+      <div id="editProductModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeEditProductModal()">&times;</span>
+          <h2>Edit Product</h2>
+          <form id="editProductForm" enctype="multipart/form-data" onsubmit="submitEditProduct(event)">
+            <input type="hidden" id="editProductId" name="id">
+            <label for="productName">Product Name</label>
+            <input type="text" id="editProductName" name="name" required>
+
+            <label for="productBrand">Brand</label>
+            <input type="text" id="editProductBrand" name="brand" required>
+
+            <label for="productCategory">Category</label>
+            <select id="editProductCategory" name="category" required>
+              <option value="">Select Category</option>
+
+              {{#each categories}}
+              <option value="{{this._id}}" {{#if (isSelected _id ../productCategoryId)}}selected{{/if}}>{{this.name}}
+              </option>
+              {{/each}}
+            </select>
+
+            <label for="productDescription">Description</label>
+            <textarea id="editProductDescription" name="description" required></textarea>
+
+            <label for="regularPrice">Regular Price</label>
+            <input type="number" id="editRegularPrice" name="regularPrice" required>
+
+            <label for="salesPrice">Sales Price</label>
+            <input type="number" id="editSalesPrice" name="salesPrice" required>
+
+            <label for="productStock">Quantity</label>
+            <input type="number" id="editProductStock" name="quantity" required>
+
+            <label for="productColor">Color</label>
+            <input type="text" id="editProductColor" name="color" required>
+
+            <label>Existing Image</label>
+            <div id="existingImagesContainer"></div>
+
+            <label for="productImages">Upload Images</label>
+            <input type="file" id="editProductImages" name="productImages" multiple accept="image/*"
+              onchange="previewNewImages(event)">
+            <div id="newImagesPreviewContainer"></div>
+
+            <button type="submit">Save Product</button>
+          </form>
+        </div>
+      </div>
+
+
+
+
+
+      <script>
+
+   
+
+        const addProductModal = document.getElementById("addProductModal");
+        const editProductModal = document.getElementById("editProductModal");
+
+        // Open the Add Product Modal
+        document.querySelector(".add-btn").onclick = function () {
+          addProductModal.style.display = "block";
+        };
+
+        // Close the Add Product Modal
+        function closeAddProductModal() {
+          addProductModal.style.display = "none";
+        }
+
+
+
+        // Close modal if user clicks outside of it
+        window.onclick = function (event) {
+          if (event.target === addProductModal) {
+            closeAddProductModal();
+          }
+        };
+
+
+
+        let cropper;
+        let previewImages = [];
+
+        // Handle the file input and preview images
+        function previewAndCropImages(event) {
+          const files = event.target.files;
+          if (files.length > 3) {
+            alert('You can only upload up to 3 images.');
+            return;
+          }
+
+          // Clear previous previews
+          document.getElementById("imagePreviewContainer").innerHTML = '';
+          previewImages = [];
+
+          Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const imageContainer = document.createElement('div');
+              imageContainer.classList.add('image-preview');
+              const imgElement = document.createElement('img');
+              imgElement.src = e.target.result;
+              imageContainer.appendChild(imgElement);
+              document.getElementById('imagePreviewContainer').appendChild(imageContainer);
+
+              // Initialize cropper for each image
+              const cropperContainer = document.createElement('div');
+              imageContainer.appendChild(cropperContainer);
+              const cropperInstance = new Cropper(imgElement, {
+                aspectRatio: 1,
+                preview: cropperContainer,
+                viewMode: 1,
+                zoomable: true,
+                scalable: true,
+                cropBoxResizable: true,
+              });
+              previewImages.push(cropperInstance);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+
+
+
+
+
+        // Submit New Product Form
+        async function submitNewProduct(event) {
+          event.preventDefault();
+
+          // Prepare form data
+          const formData = new FormData(document.getElementById("addProductForm"));
+
+          // Crop the images and append to form data
+          for (let i = 0; i < previewImages.length; i++) {
+            const croppedCanvas = previewImages[i].getCroppedCanvas();
+            croppedCanvas.toBlob((blob) => {
+              formData.append('productImages', blob, `image_${i + 1}.jpg`);
+            });
+          }
+
+          try {
+            const response = await axios.post("/admin/addProduct", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            });
+            console.log(response);
+            if (response.data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: response.data.message,
+                confirmButtonText: 'OK'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  closeAddProductModal();
+                  location.reload();
+                }
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: response.data.message || "Failed to add product",
+                confirmButtonText: 'OK'
+              });
+            }
+          } catch (error) {
+            console.error("Error adding product:", error);
+            alert("Something went wrong.");
+          }
+        }
+
+
+        function openEditModal(productId, productName, productBrand, productCategory, productDescription, regularPrice, salesPrice, productStock, productColor, imageUrl) {
+
+          document.getElementById("editProductId").value = productId
+          document.getElementById("editProductName").value = productName
+          document.getElementById("editProductBrand").value = productBrand
+
+          const categorySelect = document.getElementById("editProductCategory");
+          categorySelect.value = productCategory;
+
+          document.getElementById("editProductDescription").value = productDescription
+          document.getElementById("editRegularPrice").value = regularPrice
+          document.getElementById("editSalesPrice").value = salesPrice
+          document.getElementById("editProductStock").value = productStock
+          document.getElementById("editProductColor").value = productColor
+
+          const existingImageContainer = document.getElementById("existingImagesContainer");
+          existingImageContainer.innerHTML = ""; // Clear previous images
+          console.log("imageUrl",imageUrl)
+         const imageArray = Array.isArray(imageUrl) ? imageUrl : imageUrl ? imageUrl.split(',') : [];
+          
+          console.log("imageArray hahaah",imageArray)
+
+          imageArray.forEach((url, index) => {
+            const imageElement = document.createElement("div");
+            console.log("url hahahqqq",url)
+            imageElement.className = "image-wrapper";
+            imageElement.innerHTML = `
+            <img src="/${url}" style="width: 100px;">
+            <button type="button" onclick="deleteImage('${url}', ${index})">Delete</button>
+        `;
+            existingImageContainer.appendChild(imageElement);
+          });
+          document.getElementById("editProductModal").style.display = "block";
+        }
+
+
+
+        // delete product images
+        async function deleteImage(imageUrl, index) {
+          try {
+            const response = await axios.delete(`/admin/deleteProductImage`, { data: { imageUrl } });
+            if (response.data.success) {
+              Swal.fire('Deleted!', 'The image has been deleted.', 'success');
+              document.querySelector(`#existingImagesContainer .image-wrapper:nth-child(${index + 1})`).remove();
+            } else {
+              alert("Failed to delete the image");
+            }
+          } catch (error) {
+            console.error("Error deleting image:", error);
+          }
+        }
+
+
+
+        // priview new images
+        function previewNewImages(event) {
+          const files = event.target.files;
+          const previewContainer = document.getElementById("newImagesPreviewContainer");
+          previewContainer.innerHTML = ""; // Clear previous previews
+
+          Array.from(files).forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              img.style.width = "100px";
+              previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+
+
+        // Update existing Product
+        async function submitEditProduct(event) {
+          event.preventDefault();
+          const formData = new FormData(document.getElementById("editProductForm"));
+
+          const productId = document.getElementById("editProductId").value;
+
+          try {
+            const response = await axios.put(`/admin/editProduct/${productId}`, formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            if (response.data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: response.data.message, // Use the success message from the response
+                confirmButtonText: 'OK!'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  closeEditProductModal();
+                  location.reload();
+                }
+              })
+
+            } else {
+              alert("Failed to update product");
+            }
+          } catch (error) {
+            console.error("Error updating product:", error);
+          }
+        }
+
+        function closeEditProductModal() {
+          document.getElementById("editProductModal").style.display = "none";
+        }
+
+
+
+
+
+
+        async function moveToDeleted(productId) {
+          try {
+            console.log(productId)
+
+            const response = await axios.post(`/admin/blockProduct/${productId}`);
+            if (response.data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: response.data.message, // Use the success message from the response
+                confirmButtonText: 'OK!'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  location.reload();
+                }
+              })
+
+            } else {
+              console.error("Error blocking product:", response.message);
+            }
+          } catch (er) {
+            console.log(er);
+          }
+        }
+
+
+
+        // restore product
+        async function restoreProduct(productId) {
+          try {
+            const response = await axios.put(`/admin/unBlockProduct/${productId}`);
+            if (response.data.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: response.data.message, // Use the success message from the response
+                confirmButtonText: 'OK!'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  location.reload();
+
+                }
+              })
+            } else {
+              alert("Failed to restore product");
+            }
+          } catch (error) {
+            console.error("Error restoring product:", error);
+            alert("An error occurred while restoring the product.");
+          }
+        }
+
+
+
+
+
+
+      </script>
+
+
+
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script src="https://cdn.jsdelivr.net/npm/cropperjs"></script>
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</body>

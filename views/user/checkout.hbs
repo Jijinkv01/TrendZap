@@ -1,0 +1,506 @@
+<link rel="stylesheet" href="/styles/cart.css">
+<link rel="stylesheet" href="/styles/userproduct.css">
+<link rel="stylesheet" href="/styles/home.css">
+<link rel="stylesheet" href="/styles/productDetails.css">
+<link rel="stylesheet" href="/styles/userprofile.css">
+<link rel="stylesheet" href="/styles/userAddress.css">
+<link rel="stylesheet" href="/styles/checkout.css">
+
+
+
+
+
+
+
+<body>
+  {{>navbar}}
+  <div class="container mt-5">
+    <h2 class="text-center">Checkout</h2> <span id="applyCoupon">
+      <input type="text" id="couponInput" placeholder="Enter Coupon Code">
+      <button id="applyButton">Apply Coupon</button>
+    </span> <br>
+
+    <div class="row">
+      <!-- Addresses Section -->
+      <div class="col-md-8">
+        <h4>Select Address</h4>
+
+        <div class="row">
+          {{#each address}}
+          <div class="col-md-4 mb-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">{{this.firstName}} {{this.lastName}}</h5>
+                <p><strong>Street Address:</strong> {{this.streetAddress}}</p>
+                <p><strong>City:</strong> {{this.city}}</p>
+                <p><strong>State:</strong> {{this.state}}</p>
+                <p><strong>Postal Code:</strong> {{this.postalCode}}</p>
+                <button class="btn btn-primary select-address-btn" data-id="{{this._id}}">Use this Address</button>
+              </div>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+
+        <h4 class="mt-4">Add New Address</h4>
+        <form id="new-address-form" method="post" action="/addAddress">
+          <div class="form-row">
+            <div class="col-md-6 mb-3">
+              <label for="firstName" class="form-label">First Name</label>
+              <input type="text" class="form-control" name="firstName" id="firstName" >
+                <div id="errorFirstName" style="color: red;"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="lastName" class="form-label">Last Name</label>
+              <input type="text" class="form-control" name="lastName" id="lastName" >
+               <div id="errorLastName" style="color: red;"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="streetAddress" class="form-label">Street Address</label>
+              <input type="text" class="form-control" name="streetAddress" id="streetAddress" >
+              <div id="errorStreetAddress" style="color: red;"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-3">
+              <label for="city" class="form-label">City</label>
+              <input type="text" class="form-control" name="city" id="city" >
+              <div id="errorCity" style="color: red;"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="state" class="form-label">State</label>
+              <input type="text" class="form-control" name="state" id="state" >
+              <div id="errorState" style="color: red;"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="col-md-6 mb-3">
+              <label for="postalCode" class="form-label">Postal Code</label>
+              <input type="text" class="form-control" name="postalCode" id="postalCode" >
+              <div id="errorPostalCode" style="color: red;"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+
+              <input type="hidden" class="form-control" value="checkout" name="checkout">
+            </div>
+
+          </div>
+
+          <button type="submit" class="btn btn-success">Add Address</button>
+        </form>
+      </div>
+
+      <!-- Order Summary Section -->
+      <div class="col-md-4">
+        <div class="card order-summary-card shadow-sm">
+          <div class="card-header">
+            <h4><i class="fas fa-receipt"></i> Order Summary</h4>
+          </div>
+          <div class="card-body">
+            <p><strong><i class="fas fa-shopping-cart"></i> Total Items:</strong> {{cart.items.length}}</p><br>
+            <p><strong><i class="fas fa-rupee-sign"></i> Total Cost:</strong> ₹{{cart.totalPrice}}</p><br>
+            <p><strong><i class="fas fa-truck"></i> Shipping:</strong> ₹{{shippinFee}}</p><br>
+            <p id="couponDiscount" ><strong><i class="fas fa-tag"></i> Discount:</strong> ₹0</p><br>
+            <h5 id="grandTotal" ><strong><i class="fas fa-money-bill-wave"></i> Grand Total:</strong> ₹{{grandTotal}}</h5>
+
+            <hr>
+            <h5><i class="fas fa-credit-card"></i> Payment Method</h5>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" checked>
+              <label class="form-check-label" for="cod">
+                <i class="fas fa-hand-holding-usd"></i> Cash on Delivery
+              </label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay" value="Razorpay">
+              <label class="form-check-label" for="razorpay">
+                <i class="fas fa-credit-card"></i> Razorpay
+              </label>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn btn-primary btn-block" id="confirmBtn"><i class="fas fa-shopping-bag"></i> Place
+              Order</button>
+          </div>
+        </div><br>
+         <div>
+        <h1>Available Coupon</h1>
+        <div id="couponButtons"></div>
+        {{#each coupon}}
+      <button class="btn btn-success coupon-btn shadow-sm" onclick="applyCoupon('{{this.code}}')">{{this.code}}</button>
+      {{/each}}
+      </div>
+      </div>
+      </div>
+    
+
+
+      <script>
+
+        function applyCoupon(couponCode ,  buttonElement) {
+  const couponInput = document.getElementById('couponInput');
+  couponInput.value = couponCode; // Set the input field value to the clicked coupon code
+}
+
+
+        let selectedAddressId = null;
+
+        // Address Selection
+        document.querySelectorAll('.select-address-btn').forEach(button => {
+          button.addEventListener('click', () => {
+
+            document.querySelectorAll('.card').forEach(card => {
+              card.style.border = 'none'; // Reset border
+              card.style.boxShadow = 'none';
+            });
+
+            // Highlight the selected card
+            const selectedCard = button.closest('.card'); // Find the closest parent card
+            selectedCard.style.border = '3px solid yellow'; // Add yellow border
+            selectedCard.style.boxShadow = '0 4px 15px rgba(255, 223, 0, 0.7)';
+
+
+            selectedAddressId = button.getAttribute('data-id');
+            console.log("address selected successfully")
+          });
+        });
+
+        // Place Order
+        /* document.getElementById('confirmBtn').addEventListener('click', () => {
+           if (!selectedAddressId) {
+             swal.fire({
+               title: "Address Required",
+               text: "Please select an address",
+               icon: "warning",
+               confirmButtonText: "OK"
+             });
+             return;
+           }
+ 
+           const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+ 
+           console.log("paymentMethod:", paymentMethod)
+           console.log("selectedAddressId", selectedAddressId)
+ 
+ 
+           axios.post('/placeOrder', {
+             addressId: selectedAddressId,
+             paymentMethod: paymentMethod
+ 
+           })
+             .then(response => {
+               if (response.data.success) {
+ 
+                 swal.fire({
+                   title: "success",
+                   text: "Order placed successfully!",
+                   icon: "success",
+                   confirmButtonText: "OK"
+                 })
+                   .then(() => {
+                     const orderId = response.data.orderId
+                     console.log("orderid:", orderId)
+                     window.location.href = '/orderConfirm';
+                   })
+ 
+               } else {
+                 swal.fire({
+                   title: "error",
+                   text: "Faild to place order",
+                   icon: "warning",
+                   confirmButtonText: "OK"
+                 });
+               }
+             })
+             .catch(error => {
+               console.error("Error placing order:", error);
+               alert("An error occurred while placing the order.");
+             });
+         });    */
+
+        document.getElementById('confirmBtn').addEventListener('click', async () => {
+          if (!selectedAddressId) {
+            swal.fire({
+              title: "Address Required",
+              text: "Please select an address",
+              icon: "warning",
+              confirmButtonText: "OK"
+            });
+            return;
+          }
+
+          const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+          if (paymentMethod === 'Razorpay') {
+            try {
+              // Fetch order details from your server
+              const response = await axios.post('/createOrder', {
+                amount: {{ grandTotal }}, // Ensure `grandTotal` is passed correctly in the template
+          });
+
+        const { order } = response.data; // Destructure the `order` from the response
+
+        const options = {
+          key: "{{process.env.RAZORPAY_KEY_ID}}", // Replace with Razorpay Key ID
+          amount: order.amount,
+          currency: order.currency,
+          name: "TrendZap", // Your platform's name
+          description: "Order Payment",
+          order_id: order.id, // Razorpay Order ID
+          handler: function (response) {
+            // Payment success handler
+            console.log(response);
+            axios.post('/placeOrder', {
+              addressId: selectedAddressId,
+              paymentMethod: "Razorpay",
+              paymentDetails: response, // Include Razorpay payment details
+            })
+              .then(res => {
+                if (res.data.success) {
+                  swal.fire({
+                    title: "Success",
+                    text: "Order placed successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                  }).then(() => {
+                    window.location.href = '/orderConfirm';
+                  });
+                }
+              })
+              .catch(err => {
+                console.error("Error placing order:", err);
+                swal.fire({
+                  title: "Error",
+                  text: "Failed to place the order. Try again later.",
+                  icon: "error",
+                  confirmButtonText: "OK"
+                });
+              });
+          },
+          theme: {
+            color: "#3399cc"
+          }
+        };
+
+        const razorpayInstance = new Razorpay(options);
+
+        // Handle payment failures
+       razorpayInstance.on('payment.failed', async function (response) {
+                console.log("Payment failed:", response.error);
+
+                try {
+                    // Save the order with pending payment status
+                    await axios.post('/saveFailedOrder', {
+                        addressId: selectedAddressId,
+                        paymentMethod: "Razorpay",
+                        paymentStatus: "Payment Failed",
+                        razorpayOrderId: order.id, // Razorpay order ID
+                        paymentError: response.error, // Error details
+                    });
+
+                    swal.fire({
+                        title: "Payment Failed",
+                        text: "Your payment was not successful. Please retry from the Orders page.",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        window.location.href = '/orders';
+                    });
+                } catch (err) {
+                    console.error("Error saving failed order:", err);
+                    swal.fire({
+                        title: "Error",
+                        text: "An error occurred while saving the order.",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
+                }
+            });
+        // Open Razorpay payment gateway
+        razorpayInstance.open();
+  } catch (error) {
+          console.error("Error initializing Razorpay:", error);
+          swal.fire({
+            title: "Error",
+            text: "Failed to initialize Razorpay. Try again later.",
+            icon: "error",
+            confirmButtonText: "OK"
+          });
+        }
+} else {
+
+  const discountText = document.getElementById("couponDiscount").innerText; // Example: "₹0"
+const discountAmount = parseInt(discountText.replace(/[^0-9]/g, '')) || 0;
+console.log("discountAmount",discountAmount)
+
+          // Handle Cash on Delivery
+          axios.post('/placeOrder', {
+            addressId: selectedAddressId,
+            paymentMethod: paymentMethod,
+            discount:discountAmount
+          })
+            .then(response => {
+              if (response.data.success) {
+                swal.fire({
+                  title: "Success",
+                  text: "Order placed successfully!",
+                  icon: "success",
+                  confirmButtonText: "OK"
+                }).then(() => {
+                  window.location.href = '/orderConfirm';
+                });
+              } else {
+                swal.fire({
+                  title: "Error",
+                  text: response.data.message ,
+                  icon: "warning",
+                  confirmButtonText: "OK"
+                });
+              }
+            })
+            .catch(error => {
+              console.error("Error placing order:", error);
+              swal.fire({
+                title: "Error",
+                text: "An error occurred while placing the order.",
+                icon: "error",
+                confirmButtonText: "OK"
+              });
+            });
+        }
+
+});
+
+
+// apply coupon
+document.getElementById('applyButton').addEventListener('click', async () => {
+  const couponCode = document.getElementById('couponInput').value.trim();
+  let cartTotalPrice = {{cart.totalPrice}}
+  
+  if (!couponCode) {
+    swal.fire({
+      title: "Coupon Required",
+      text: "Please enter a coupon code.",
+      icon: "warning",
+      confirmButtonText: "OK"
+    });
+    return;
+  }
+
+  try {
+    const response = await axios.post('/applyCoupon', {
+      couponCode: couponCode,
+      cartTotalPrice
+
+    });
+   
+
+    if (response.data.success) {
+      // Apply the coupon discount
+      const discount = response.data.discount;
+      const discountAmount = ({{cart.totalPrice}}*discount) /100
+     // const newGrandTotal = {{grandTotal}}-discount
+      const newGrandTotal = {{cart.totalPrice}}-discountAmount+{{shippinFee}}
+
+      swal.fire({
+        title: "Coupon Applied",
+        text: `You have received a discount of ₹${discountAmount}`,
+        icon: "success",
+        confirmButtonText: "OK"
+      });
+
+      // Update the UI with the new grand total
+      document.getElementById("couponDiscount").innerHTML = `<strong><i class="fas fa-tag"></i> Discount:</strong> ₹${discountAmount}</p>`;
+      
+      document.querySelector('.order-summary-card .card-body h5').innerHTML = `<strong><i class="fas fa-money-bill-wave"></i> Grand Total:</strong> ₹${newGrandTotal}`;
+      
+    } else {
+      swal.fire({
+        title: "Invalid Coupon",
+        text: response.data.message,
+        icon: "error",
+        confirmButtonText: "OK"
+      });
+    }
+  } catch (error) {
+    console.error("Error applying coupon:", error);
+    swal.fire({
+      title: "Error",
+      text: "An error occurred while applying the coupon.",
+      icon: "error",
+      confirmButtonText: "OK"
+    });
+  }
+});
+
+
+
+// add address validation
+const newAddressForm = document.getElementById("new-address-form")
+
+newAddressForm.addEventListener("submit",(e)=>{
+   firstName = document.getElementById("firstName").value.trim()
+            lastName = document.getElementById("lastName").value.trim()
+            streetAddress = document.getElementById("streetAddress").value.trim()
+            city = document.getElementById("city").value.trim()
+            state = document.getElementById("state").value.trim()
+            postalCode = document.getElementById("postalCode").value.trim()
+
+            errorFirstName = document.getElementById("errorFirstName")
+            errorLastName = document.getElementById("errorLastName")
+            errorStreetAddress = document.getElementById("errorStreetAddress")
+            errorCity = document.getElementById("errorCity")
+            errorState = document.getElementById("errorState")
+            errorPostalCode = document.getElementById("errorPostalCode")
+
+            errorFirstName.textContent = ""
+            errorLastName.textContent = ""
+            errorStreetAddress.textContent = ""
+            errorCity.textContent = ""
+            errorState.textContent = ""
+            errorPostalCode.textContent = ""
+
+            if (firstName == "") {
+                e.preventDefault()
+                errorFirstName.innerHTML = "firstName is required"
+
+                return false
+            }
+            if (lastName == "") {
+                e.preventDefault()
+                errorLastName.innerHTML = "lastName is required"
+                return false
+            }
+            if (streetAddress == "") {
+                e.preventDefault()
+                errorStreetAddress.innerHTML = "streetAddress is required"
+                return false
+            }
+            if (city == "") {
+                e.preventDefault()
+                errorCity.innerHTML = "city is required"
+                return false
+            }
+            if (state == "") {
+                e.preventDefault()
+                errorState.innerHTML = "state is required"
+                return false
+            }
+            if (postalCode == "") {
+                e.preventDefault()
+                errorPostalCode.innerHTML = "postalCode is required"
+                return false
+            } else if (parseInt(postalCode) != postalCode) {
+                e.preventDefault();
+                errorPostalCode.innerHTML = "Postal code must be a number";
+                return false;
+            }
+            return true
+})
+
+
+      </script>
+
+      <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>

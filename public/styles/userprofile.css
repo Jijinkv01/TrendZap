@@ -1,0 +1,43 @@
+/* Add any custom styles for your profile page */
+body {
+    font-family: Arial, sans-serif;
+}
+
+.container-fluid {
+    margin-top: 20px;
+}
+
+.card {
+    margin-top: 20px;
+}
+
+.nav-link {
+    padding: 10px 0;
+}
+
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-3 {
+        margin-bottom: 20px;
+    }
+}
+
+
+
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+main.container-fluid {
+    flex: 1;
+}
+
+footer {
+    width: 100%;
+}

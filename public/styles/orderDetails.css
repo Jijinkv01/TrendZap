@@ -1,0 +1,146 @@
+.container {
+    margin-top: 20px;
+}
+
+.table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.product {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.product-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.text-success {
+    color: green;
+}
+
+.text-danger {
+    color: red;
+}
+
+.text-warning {
+    color: orange;
+}
+
+.btn {
+    margin: 0 5px;
+}
+
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-dialog {
+    max-width: 500px;
+  }
+  
+  .modal-content {
+    padding: 20px;
+    background: white;
+  }
+  
+
+  
+
+
+
+
+
+
+
+
+
+  .modal-header .close {
+    background-color: transparent; 
+    border: none; 
+    font-size: 1.5rem; 
+    color: #0c0d0c; 
+    cursor: pointer; 
+    transition: color 0.3s ease, transform 0.2s ease; 
+  }
+  
+  .modal-header .close:hover {
+    color: #dc3545; 
+    transform: scale(1.2); 
+  }
+  
+  .modal-header .close:focus {
+    outline: none; 
+    color: #dc3545; 
+  }
+
+
+
+
+
+
+
+
+  .table {
+    margin-top: 20px;
+    font-size: 14px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .table thead {
+    background-color: #343a40;
+    color: #fff;
+  }
+  
+  .table tbody tr {
+    vertical-align: middle;
+  }
+  
+  .table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .product-image {
+    border: 1px solid #ddd;
+  }
+  
+  .btn {
+    font-size: 12px;
+    padding: 6px 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn:hover {
+    opacity: 0.85;
+  }
+  
+  .badge {
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  
+  .d-flex {
+    display: flex;
+    align-items: center;
+  }
+  
+  .gap-2 {
+    gap: 0.5rem;
+  }
+  

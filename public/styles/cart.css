@@ -1,0 +1,74 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+  }
+  
+  h2 {
+    margin-top: 20px;
+    color: #333;
+  }
+  
+  .container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Styling for the table */
+  table.table {
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+
+  table.table th, table.table td {
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  table.table th {
+    background-color: #f1f1f1;
+    color: #333;
+    font-weight: bold;
+  }
+
+  /* Quantity control button styling */
+  .input-group .btn {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    color: #333;
+  }
+
+  /* Remove button */
+  .btn-danger {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+  }
+
+  .btn-danger:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+  }
+
+  /* Checkout button */
+  .btn-success {
+    font-size: 18px;
+    padding: 10px 20px;
+    border-radius: 8px;
+  }
+
+  /* Total price styling */
+  h4 {
+    font-weight: bold;
+    color: #28a745;
+  }
+
+  /* Empty cart message */
+  .text-center {
+    color: #888;
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 30px;
+  }

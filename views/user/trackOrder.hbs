@@ -1,0 +1,32 @@
+
+<link rel="stylesheet" href="/styles/trackOrder.css">
+<body>
+  <h1>Your Order History</h1>
+{{#if order.length}}
+  <div class="order-list">
+    {{#each order}}
+      <div class="order">
+        <h2>Order Date: {{this.orderDate}}</h2>
+        <h3>Total Price: ${{this.totalPrice}}</h3>
+        
+        <div class="order-items">
+          {{#each this.items}}
+            <div class="order-item">
+              <img src="{{this.image}}" alt="{{this.name}}" class="order-item-image">
+              <p>{{this.name}}</p>
+              <p>Quantity: {{this.quantity}}</p>
+              <p>Total Price: ${{this.totalPrice}}</p>
+            </div>
+          {{/each}}
+        </div>
+
+        <form action="/cancel-order/{{this._id}}" method="POST">
+          <button type="submit" class="cancel-btn" {{#ifEquals this.status "Cancelled"}}disabled{{/ifEquals}}>Cancel Order</button>
+        </form>
+      </div>
+    {{/each}}
+  </div>
+{{else}}
+  <p>You have no orders yet.</p>
+{{/if}}
+</body>

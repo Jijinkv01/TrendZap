@@ -1,0 +1,11 @@
+nav a i.fa-user {
+    font-size: 1.5em; /* Adjust size as needed */
+    margin-left: 10px; /* Add space around the icon */
+}
+
+#searchForm{
+    width: 400px;
+    margin: auto;
+}
+
+

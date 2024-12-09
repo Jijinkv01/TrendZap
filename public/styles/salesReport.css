@@ -1,0 +1,7 @@
+.card {
+    min-height: 200px; /* Ensures a minimum height for all cards */
+    
+}
+.card-text {
+    color: white !important; /* Ensures text color consistency */
+}
