@@ -121,10 +121,6 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 1000 * 60 * 60 * 24 },
-    store: MongoStore.create({
-        mongoUrl: 'mongodb://localhost:27017/TrendZap', // Connection string for MongoDB
-        ttl: 14 * 24 * 60 * 60, // Session expiry in seconds (14 days in this case)
-    }),
 
 }))
 
